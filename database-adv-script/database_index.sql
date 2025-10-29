@@ -8,6 +8,50 @@
 USE airbnb_db;
 
 -- =====================================================
+-- Measure Performance BEFORE Adding Indexes
+-- =====================================================
+-- Tip: Run these EXPLAIN ANALYZE statements BEFORE the CREATE INDEX section
+-- to capture baseline performance. Requires MySQL 8.0.18+.
+
+-- 1) Bookings ordered by created_at (used in joins_queries.sql)
+EXPLAIN ANALYZE
+SELECT 
+    b.id, b.property_id, b.guest_id, b.created_at
+FROM bookings b
+ORDER BY b.created_at DESC
+LIMIT 20;
+
+-- 2) User bookings with JOIN and ORDER BY (joins_queries.sql)
+EXPLAIN ANALYZE
+SELECT 
+    b.id, b.created_at, u.id AS user_id
+FROM bookings b
+INNER JOIN users u ON b.guest_id = u.id
+ORDER BY b.created_at DESC
+LIMIT 20;
+
+-- 3) Properties filtered by location and price (common search)
+EXPLAIN ANALYZE
+SELECT 
+    p.id, p.city, p.state, p.price_per_night
+FROM properties p
+WHERE p.city = 'San Francisco'
+  AND p.state = 'CA'
+  AND p.price_per_night <= 250
+ORDER BY p.price_per_night;
+
+-- 4) Aggregation: bookings per user (aggregations_and_window_functions.sql)
+EXPLAIN ANALYZE
+SELECT 
+    u.id,
+    COUNT(b.id) AS total_bookings
+FROM users u
+LEFT JOIN bookings b ON u.id = b.guest_id
+GROUP BY u.id
+ORDER BY total_bookings DESC
+LIMIT 20;
+
+-- =====================================================
 -- Analysis Summary
 -- =====================================================
 -- High-usage columns identified from query patterns:
@@ -135,6 +179,49 @@ CREATE INDEX IF NOT EXISTS idx_bookings_property_status ON bookings(property_id,
 -- For user booking aggregation queries
 -- Optimizes aggregations like: COUNT, SUM grouped by guest_id
 CREATE INDEX IF NOT EXISTS idx_bookings_guest_status_price ON bookings(guest_id, status, total_price);
+
+-- =====================================================
+-- Measure Performance AFTER Adding Indexes
+-- =====================================================
+-- Run the same statements again to compare with the baseline.
+
+-- 1) Bookings ordered by created_at (should avoid filesort with index)
+EXPLAIN ANALYZE
+SELECT 
+    b.id, b.property_id, b.guest_id, b.created_at
+FROM bookings b
+ORDER BY b.created_at DESC
+LIMIT 20;
+
+-- 2) User bookings with JOIN and ORDER BY
+EXPLAIN ANALYZE
+SELECT 
+    b.id, b.created_at, u.id AS user_id
+FROM bookings b
+INNER JOIN users u ON b.guest_id = u.id
+ORDER BY b.created_at DESC
+LIMIT 20;
+
+-- 3) Properties filtered by location and price
+EXPLAIN ANALYZE
+SELECT 
+    p.id, p.city, p.state, p.price_per_night
+FROM properties p
+WHERE p.city = 'San Francisco'
+  AND p.state = 'CA'
+  AND p.price_per_night <= 250
+ORDER BY p.price_per_night;
+
+-- 4) Aggregation: bookings per user
+EXPLAIN ANALYZE
+SELECT 
+    u.id,
+    COUNT(b.id) AS total_bookings
+FROM users u
+LEFT JOIN bookings b ON u.id = b.guest_id
+GROUP BY u.id
+ORDER BY total_bookings DESC
+LIMIT 20;
 
 -- =====================================================
 -- Note on Existing Indexes
