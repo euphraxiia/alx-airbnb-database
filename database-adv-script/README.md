@@ -9,6 +9,8 @@ This directory contains SQL queries demonstrating different types of JOIN operat
 - `aggregations_and_window_functions.sql` - Contains queries demonstrating aggregation functions and window functions
 - `database_index.sql` - Contains CREATE INDEX statements for query optimization
 - `index_performance.md` - Documentation of index performance analysis with EXPLAIN results
+- `perfomance.sql` - Contains initial and optimized complex query for booking retrieval
+- `optimization_report.md` - Detailed analysis of query optimization with EXPLAIN results and performance metrics
 
 ## Prerequisites
 
