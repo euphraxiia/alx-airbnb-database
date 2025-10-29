@@ -1,0 +1,105 @@
+erDiagram
+    User ||--o{ Property : owns
+    User ||--o{ Booking  : makes
+    Property ||--o{ Booking : has
+    Booking ||--|| Review  : receives
+    Booking ||--|| Payment : pays
+    Property }o--o{ Amenity : features
+    Property ||--o{ PropertyImage : includes
+    Booking ||--o{ Message : has
+    User ||--o{ Message : sends
+
+    User {
+        int id PK
+        string first_name
+        string last_name
+        string email "unique"
+        string phone_number
+        string password_hash
+        datetime created_at
+        datetime updated_at
+    }
+
+    Property {
+        int id PK
+        int owner_id FK "→ User.id"
+        string title
+        string description
+        string address_line1
+        string address_line2
+        string city
+        string state
+        string postal_code
+        string country
+        float latitude
+        float longitude
+        decimal price_per_night
+        int max_guests
+        datetime created_at
+        datetime updated_at
+    }
+
+    Booking {
+        int id PK
+        int property_id FK "→ Property.id"
+        int guest_id FK "→ User.id"
+        date check_in_date
+        date check_out_date
+        decimal total_price
+        enum status "pending|confirmed|cancelled|completed"
+        datetime created_at
+        datetime updated_at
+    }
+
+    Review {
+        int id PK
+        int booking_id FK "→ Booking.id (unique)"
+        int rating "1..5"
+        string comment
+        datetime created_at
+        datetime updated_at
+    }
+
+    Payment {
+        int id PK
+        int booking_id FK "→ Booking.id (unique)"
+        decimal amount
+        string currency
+        string method
+        enum status "pending|authorized|captured|failed|refunded"
+        string transaction_ref
+        datetime processed_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    Amenity {
+        int id PK
+        string name "unique"
+        datetime created_at
+        datetime updated_at
+    }
+
+    PropertyAmenity {
+        int property_id FK "→ Property.id"
+        int amenity_id FK "→ Amenity.id"
+        string PK "(property_id, amenity_id)"
+    }
+
+    PropertyImage {
+        int id PK
+        int property_id FK "→ Property.id"
+        string image_url
+        bool is_primary
+        int sort_order
+        datetime created_at
+        datetime updated_at
+    }
+
+    Message {
+        int id PK
+        int booking_id FK "→ Booking.id"
+        int sender_id FK "→ User.id"
+        string body
+        datetime sent_at
+    }
