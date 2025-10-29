@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides a comprehensive analysis of the Airbnb database schema to ensure it adheres to Third Normal Form (3NF) principles. Normalization eliminates data redundancy and ensures data integrity by organizing data into logically structured tables.
+This document provides a comprehensive analysis of the Airbnb database schema to ensure it adheres to Third Normal Form (3NF) principles. Normalization eliminates data redundancy and ensures data integrity by organising data into logically structured tables.
 
 ## Normalization Levels
 
