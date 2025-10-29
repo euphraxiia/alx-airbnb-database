@@ -6,6 +6,7 @@ This directory contains SQL queries demonstrating different types of JOIN operat
 
 - `joins_queries.sql` - Contains three complex queries using different JOIN types
 - `subqueries.sql` - Contains queries demonstrating correlated and non-correlated subqueries
+- `aggregations_and_window_functions.sql` - Contains queries demonstrating aggregation functions and window functions
 
 ## Prerequisites
 
@@ -186,3 +187,104 @@ Based on the seed data:
 - **Correlated subqueries** provide more flexibility but can be slower
 - Both query files include alternative approaches commented out for learning
 - Consider using indexes on foreign keys (guest_id, property_id, booking_id) for better performance
+
+---
+
+## Aggregations and Window Functions Overview
+
+This section demonstrates **aggregation functions** (COUNT, SUM, AVG, etc.) with GROUP BY, and **window functions** (RANK, DENSE_RANK, ROW_NUMBER) for advanced data analysis.
+
+### Query 1: Aggregation with COUNT and GROUP BY
+**Objective:** Find the total number of bookings made by each user using COUNT function and GROUP BY clause.
+
+**What it does:**
+- Joins `users` with `bookings` to get user booking information
+- Uses `COUNT(b.id)` to count bookings per user
+- Uses `GROUP BY` to aggregate data by user
+- Includes additional aggregations: SUM, AVG, MIN, MAX for comprehensive analysis
+- Uses LEFT JOIN to include users with zero bookings (showing 0 count)
+
+**Aggregation functions used:**
+- `COUNT(b.id)` - Counts the number of bookings per user
+- `SUM(b.total_price)` - Total amount spent by each user
+- `AVG(b.total_price)` - Average booking price per user
+- `MIN(b.check_in_date)` - Earliest booking date
+- `MAX(b.check_in_date)` - Most recent booking date
+
+**Example Use Case:**
+- Customer analytics: Analyze booking patterns by user
+- Generate user activity reports
+- Identify most active customers
+- Calculate customer lifetime value metrics
+
+### Query 2: Window Functions (RANK, DENSE_RANK, ROW_NUMBER)
+**Objective:** Rank properties based on the total number of bookings they have received using window functions.
+
+**What it does:**
+- Calculates total bookings per property using COUNT and GROUP BY
+- Applies three different window functions to rank properties:
+  - **RANK()**: Assigns same rank for ties, skips ranks after ties (1, 2, 2, 4, 5...)
+  - **DENSE_RANK()**: Assigns same rank for ties, doesn't skip ranks (1, 2, 2, 3, 4...)
+  - **ROW_NUMBER()**: Assigns unique sequential numbers, breaks ties arbitrarily (1, 2, 3, 4, 5...)
+- Orders by booking count descending to rank most popular properties first
+
+**Window function syntax:**
+```sql
+RANK() OVER (ORDER BY COUNT(b.id) DESC)
+```
+
+**Key differences between ranking functions:**
+
+| Function | Behavior with Ties | Example Output |
+|----------|-------------------|----------------|
+| **RANK()** | Same rank, skips next ranks | 1, 2, 2, 4, 5 |
+| **DENSE_RANK()** | Same rank, no skipping | 1, 2, 2, 3, 4 |
+| **ROW_NUMBER()** | Unique numbers (breaks ties) | 1, 2, 3, 4, 5 |
+
+**Example Use Case:**
+- Property performance analysis: Identify most popular properties
+- Marketing prioritization: Focus on top-ranked properties
+- Competitive analysis: Compare property booking volumes
+- Business intelligence: Generate property rankings for reports
+
+## Running the Aggregation and Window Function Queries
+
+```bash
+# Option 1: Run the entire file
+mysql -u your_username -p airbnb_db < aggregations_and_window_functions.sql
+
+# Option 2: Run individual queries in MySQL client
+mysql -u your_username -p airbnb_db
+mysql> source aggregations_and_window_functions.sql;
+
+# Option 3: Copy and paste individual queries into your MySQL client
+```
+
+## Expected Results (Aggregations and Window Functions)
+
+Based on the seed data:
+
+1. **Aggregation Query (Bookings per user):**
+   - Should return 3 rows (one per user)
+   - Users with bookings will show counts ≥ 1
+   - Users without bookings will show 0 count
+   - User ID 1 should show 2 bookings (based on seed data: bookings 3 and 4)
+   - User ID 2 should show 1 booking (booking 1)
+   - User ID 3 should show 1 booking (booking 2)
+
+2. **Window Function Query (Property rankings):**
+   - Should return 4 rows (one per property)
+   - Properties will be ranked by booking count
+   - Properties with the same booking count will have the same RANK() and DENSE_RANK()
+   - ROW_NUMBER() will assign unique numbers, using property_id as tie-breaker
+   - Based on seed data, properties with bookings should rank higher than those without
+
+## Notes on Aggregations and Window Functions
+
+- **GROUP BY** is required when using aggregation functions with non-aggregated columns
+- **Window functions** (like RANK) operate on result sets after aggregation
+- Window functions don't collapse rows like GROUP BY - they add computed columns
+- **PARTITION BY** can be used in window functions to create separate ranking groups
+- MySQL 8.0+ supports window functions (RANK, ROW_NUMBER, DENSE_RANK, etc.)
+- For older MySQL versions (< 8.0), window functions are not available
+- Use indexes on foreign keys (guest_id, property_id) for better aggregation performance
