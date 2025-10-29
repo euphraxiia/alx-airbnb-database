@@ -11,6 +11,8 @@ This directory contains SQL queries demonstrating different types of JOIN operat
 - `index_performance.md` - Documentation of index performance analysis with EXPLAIN results
 - `perfomance.sql` - Contains initial and optimized complex query for booking retrieval
 - `optimization_report.md` - Detailed analysis of query optimization with EXPLAIN results and performance metrics
+- `partitioning.sql` - Contains table partitioning implementation for bookings table by check_in_date
+- `partition_performance.md` - Performance analysis report for partitioned tables with EXPLAIN results and improvements
 
 ## Prerequisites
 
