@@ -7,6 +7,8 @@ This directory contains SQL queries demonstrating different types of JOIN operat
 - `joins_queries.sql` - Contains three complex queries using different JOIN types
 - `subqueries.sql` - Contains queries demonstrating correlated and non-correlated subqueries
 - `aggregations_and_window_functions.sql` - Contains queries demonstrating aggregation functions and window functions
+- `database_index.sql` - Contains CREATE INDEX statements for query optimization
+- `index_performance.md` - Documentation of index performance analysis with EXPLAIN results
 
 ## Prerequisites
 
