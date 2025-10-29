@@ -1,10 +1,11 @@
-# Database Advanced Scripts - Complex Queries with Joins
+# Database Advanced Scripts - Complex Queries
 
-This directory contains SQL queries demonstrating different types of JOIN operations on the Airbnb database.
+This directory contains SQL queries demonstrating different types of JOIN operations and subqueries on the Airbnb database.
 
 ## Files
 
 - `joins_queries.sql` - Contains three complex queries using different JOIN types
+- `subqueries.sql` - Contains queries demonstrating correlated and non-correlated subqueries
 
 ## Prerequisites
 
@@ -12,7 +13,7 @@ This directory contains SQL queries demonstrating different types of JOIN operat
 2. Ensure seed data has been loaded using `database-script-0x02/seed.sql`
 3. Make sure you're connected to MySQL/MariaDB
 
-## Queries Overview
+## Joins Queries Overview
 
 ### Query 1: INNER JOIN
 **Objective:** Retrieve all bookings and the respective users who made those bookings.
@@ -95,3 +96,93 @@ Key relationships:
 - `reviews.booking_id` → `bookings.id`
 
 For complete schema details, see `../database-script-0x01/schema.sql`
+
+---
+
+## Subqueries Queries Overview
+
+This section demonstrates both **correlated** and **non-correlated subqueries**.
+
+### Query 1: Non-Correlated Subquery
+**Objective:** Find all properties where the average rating is greater than 4.0 using a subquery.
+
+**What it does:**
+- Uses a non-correlated subquery in the FROM clause (derived table)
+- The subquery calculates the average rating per property from reviews
+- Filters properties with average rating > 4.0 using HAVING clause
+- Joins the result back to the properties table for complete property information
+- Returns property details along with average rating and review count
+
+**How it works:**
+- The subquery executes once, independently of the outer query
+- Groups reviews by property_id through bookings
+- Calculates AVG(rating) and filters results
+- The outer query joins this result set with the properties table
+
+**Example Use Case:**
+- Identify top-rated properties for featured listings
+- Quality assurance: Find properties that consistently receive high ratings
+- Marketing campaigns: Highlight highly-rated properties
+
+### Query 2: Correlated Subquery
+**Objective:** Find users who have made more than 3 bookings using a correlated subquery.
+
+**What it does:**
+- Uses a correlated subquery in the WHERE clause
+- For each user, the subquery counts their bookings by referencing the outer query's user ID
+- The subquery uses `b.guest_id = u.id` to correlate with the outer query
+- Filters users where the booking count > 3
+- Also includes the booking count in the SELECT clause for display
+
+**How it works:**
+- The subquery executes once for each row in the outer query
+- It references values from the outer query (`u.id`)
+- Each execution counts bookings for that specific user
+- Returns only users who meet the condition (> 3 bookings)
+
+**Example Use Case:**
+- Customer loyalty programs: Identify frequent customers
+- VIP user identification: Find high-value customers
+- Booking activity analysis: Track most active users
+
+### Key Differences
+
+| Feature | Non-Correlated Subquery | Correlated Subquery |
+|---------|------------------------|---------------------|
+| **Execution** | Runs once, independently | Runs once per row of outer query |
+| **Performance** | Generally faster | Can be slower with large datasets |
+| **Dependencies** | No reference to outer query | References columns from outer query |
+| **Use Case** | Filtering based on aggregated data | Row-by-row condition checking |
+
+## Running the Subquery Queries
+
+```bash
+# Option 1: Run the entire file
+mysql -u your_username -p airbnb_db < subqueries.sql
+
+# Option 2: Run individual queries in MySQL client
+mysql -u your_username -p airbnb_db
+mysql> source subqueries.sql;
+
+# Option 3: Copy and paste individual queries into your MySQL client
+```
+
+## Expected Results (Subqueries)
+
+Based on the seed data:
+
+1. **Non-Correlated Subquery (Properties with avg rating > 4.0):** 
+   - Should return property with ID 1 (the only property with a review, rating 5.0)
+   - Average rating displayed will be 5.0
+
+2. **Correlated Subquery (Users with > 3 bookings):**
+   - Based on seed data, may return no users (each user has ≤ 2 bookings)
+   - To see results, you may need to add more bookings to the seed data
+   - If you have users with > 3 bookings, they will be returned with their booking count
+
+## Notes on Subqueries
+
+- **Non-correlated subqueries** are more efficient as they execute once
+- **Correlated subqueries** provide more flexibility but can be slower
+- Both query files include alternative approaches commented out for learning
+- Consider using indexes on foreign keys (guest_id, property_id, booking_id) for better performance
