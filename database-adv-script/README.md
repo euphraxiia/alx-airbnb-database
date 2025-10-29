@@ -13,6 +13,7 @@ This directory contains SQL queries demonstrating different types of JOIN operat
 - `optimization_report.md` - Detailed analysis of query optimization with EXPLAIN results and performance metrics
 - `partitioning.sql` - Contains table partitioning implementation for bookings table by check_in_date
 - `partition_performance.md` - Performance analysis report for partitioned tables with EXPLAIN results and improvements
+- `performance_monitoring.md` - Continuous performance monitoring report with EXPLAIN ANALYZE and SHOW PROFILE analysis, bottleneck identification, and optimization implementations
 
 ## Prerequisites
 

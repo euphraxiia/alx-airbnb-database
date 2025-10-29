@@ -181,6 +181,24 @@ CREATE INDEX IF NOT EXISTS idx_bookings_property_status ON bookings(property_id,
 CREATE INDEX IF NOT EXISTS idx_bookings_guest_status_price ON bookings(guest_id, status, total_price);
 
 -- =====================================================
+-- Performance Monitoring Optimizations
+-- =====================================================
+-- Indexes identified through EXPLAIN ANALYZE and SHOW PROFILE analysis
+
+-- Covering index for user booking aggregations
+-- Optimizes: SELECT COUNT(b.id), SUM(b.total_price), AVG(b.total_price), MIN/MAX(check_in_date)
+--            WHERE guest_id = ? GROUP BY guest_id
+CREATE INDEX IF NOT EXISTS idx_bookings_guest_agg ON bookings(guest_id, total_price, check_in_date);
+
+-- Composite index for property bookings with date filtering
+-- Optimizes: Property booking queries with date ranges
+CREATE INDEX IF NOT EXISTS idx_properties_bookings_dates ON bookings(property_id, check_in_date, check_out_date);
+
+-- Note: idx_bookings_created_at already exists above
+-- Note: idx_reviews_created_at already exists above  
+-- Note: idx_users_name already exists above
+
+-- =====================================================
 -- Measure Performance AFTER Adding Indexes
 -- =====================================================
 -- Run the same statements again to compare with the baseline.
